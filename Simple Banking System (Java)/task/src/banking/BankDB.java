@@ -44,7 +44,7 @@ public class BankDB {
         try (Connection con = connect();
              Statement statement = con.createStatement()) {
 
-            int affected = statement.executeUpdate(sql);
+            statement.executeUpdate(sql);
 
         } catch (SQLException e) {
             e.printStackTrace();

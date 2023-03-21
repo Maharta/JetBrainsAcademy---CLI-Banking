@@ -5,6 +5,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../../Simple Banking System (Java)/task/src">
       <sourceFolder url="file://$MODULE_DIR$/../../../../Simple Banking System (Java)/task/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../../Simple Banking System (Java)/task/src/resource" type="java-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

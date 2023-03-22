@@ -676,6 +676,260 @@ files:
         }
     }
   learner_created: false
+- name: src/banking/Card.java
+  visible: true
+  text: |
+    package banking;
+
+    import java.util.Random;
+
+    public class Card {
+        private final String number;
+        private final String PIN;
+        private int balance = 0;
+
+        public Card() {
+            number = generateRandomCardNumber();
+            PIN = generateRandomPIN();
+        }
+
+        public Card(String number, String PIN, int balance) {
+            this.number = number;
+            this.PIN = PIN;
+            this.balance = balance;
+        }
+
+
+        private String generateRandomCardNumber() {
+            Random random = new Random();
+            String MII = "4";
+            String BIN = MII + "00000";
+            StringBuilder accountNumber = new StringBuilder();
+            for (int i = 0; i < 9; i++) {
+                accountNumber.append(random.nextInt(10));
+            }
+
+            String idNumber = BIN + accountNumber;
+            String checkSum = Luhn.generateValidChecksum(idNumber);
+
+            return idNumber + checkSum;
+        }
+
+        private String generateRandomPIN() {
+            Random random = new Random();
+            String firstDigit = String.valueOf(random.nextInt(10));
+            String secondDigit = String.valueOf(random.nextInt(10));
+            String thirdDigit = String.valueOf(random.nextInt(10));
+            String fourthDigit = String.valueOf(random.nextInt(10));
+
+            return firstDigit + secondDigit + thirdDigit + fourthDigit;
+        }
+
+
+        public int getBalance() {
+            return this.balance;
+        }
+
+        public String getNumber() {
+            return number;
+        }
+
+        public String getPIN() {
+            return PIN;
+        }
+
+    }
+  learner_created: true
+- name: src/banking/Luhn.java
+  visible: true
+  text: |
+    package banking;
+
+    public class Luhn {
+
+        public static String generateValidChecksum(String numberSequence) {
+            int sum = 0;
+            for (int i = 0; i < numberSequence.length(); i++) {
+                int num = numberSequence.charAt(i) - '0';
+                if (i % 2 == 0) {
+                    num *= 2;
+                    if (num > 9) {
+                        num -= 9;
+                    }
+                }
+                sum += num;
+            }
+            if (sum % 10 == 0) {
+                return "0";
+            }
+            return String.valueOf(10 - (sum % 10));
+        }
+
+    }
+  learner_created: true
+- name: src/banking/BankDB.java
+  visible: true
+  text: |
+    package banking;
+
+    import org.sqlite.SQLiteDataSource;
+
+    import java.sql.Connection;
+    import java.sql.ResultSet;
+    import java.sql.SQLException;
+    import java.sql.Statement;
+
+    public class BankDB {
+        private static String url;
+
+        private static Connection connect() {
+            SQLiteDataSource dataSource = new SQLiteDataSource();
+            dataSource.setUrl(url);
+            Connection con = null;
+            try {
+                con = dataSource.getConnection();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return con;
+        }
+
+        public static void createOrConnectToDBFile() {
+            try (Connection ignored = connect()) {
+                System.out.println("Database Connection Success!");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        public static void createCardTableIfNotExist() {
+
+            String sql = "CREATE TABLE IF NOT EXISTS card("
+                    + "id INTEGER PRIMARY KEY, "
+                    + "number TEXT type UNIQUE, "
+                    + "PIN TEXT, "
+                    + "balance INTEGER DEFAULT 0"
+                    + ");";
+
+            try (Connection con = connect();
+                 Statement statement = con.createStatement()) {
+
+                statement.executeUpdate(sql);
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public static int addNewCard(Card card) {
+            String sql = "INSERT INTO card (number, PIN) "
+                    + "VALUES (" + card.getNumber() + ", " +
+                    "'" + card.getPIN() + "');";
+
+
+            try (Connection con = connect();
+                 Statement statement = con.createStatement()) {
+
+                return statement.executeUpdate(sql);
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+
+        public static Card getRequestedNumber(String number, String PIN) {
+            String sql = "SELECT * FROM card WHERE number = " + number;
+
+            try (Connection con = connect();
+                 Statement statement = con.createStatement()) {
+
+                ResultSet rs = statement.executeQuery(sql);
+                if (!rs.next()) {
+                    return null;
+                }
+                String numberFromDB = rs.getString("number");
+                String actualPIN = rs.getString("PIN");
+
+                if (!PIN.equals(actualPIN)) {
+                    return null;
+                }
+
+                int balance = rs.getInt("balance");
+
+                return new Card(numberFromDB, actualPIN, balance);
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+        }
+
+        public static void setUrl(String url) {
+            BankDB.url = url;
+        }
+
+
+    }
+  learner_created: true
+- name: src/banking/CardSystem.java
+  visible: true
+  text: |
+    package banking;
+
+    public class CardSystem {
+        //    private static final HashMap<String, Card> cardMap = new HashMap<>();
+        private static CardSystem instance;
+
+        public static synchronized CardSystem getInstance() {
+            if (instance == null) {
+                instance = new CardSystem();
+            }
+            return instance;
+        }
+
+       /* public void addCard(Card card) {
+            if (cardMap.containsKey(card.getNumber())) {
+                throw new IllegalArgumentException("Account number already exist");
+            }
+            cardMap.put(card.getNumber(), card);
+            System.out.println(cardMap);
+        }
+
+        public Card getCardByNumber(String number) {
+            return cardMap.get(number);
+        }*/
+
+        public Card addCard() {
+            Card newCard = new Card();
+            BankDB.createCardTableIfNotExist();
+            int statusCode = BankDB.addNewCard(newCard);
+            if (statusCode != 0) {
+                return newCard;
+            }
+            return addCard();
+        }
+
+        public Card loginWithCredentials(String number, String PIN) {
+            return BankDB.getRequestedNumber(number, PIN);
+        }
+
+
+    }
+  learner_created: true
+- name: src/banking/ValidityInfo.java
+  visible: true
+  learner_created: true
+- name: card.s3db
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/8428#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">Hyperskill</a>
+    to continue learning.
+  time: "Wed, 22 Mar 2023 01:15:10 UTC"
 record: -1

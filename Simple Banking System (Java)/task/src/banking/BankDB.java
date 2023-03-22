@@ -2,10 +2,7 @@ package banking;
 
 import org.sqlite.SQLiteDataSource;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class BankDB {
     private static String url;
@@ -68,7 +65,7 @@ public class BankDB {
         }
     }
 
-    public static Card getRequestedNumber(String number, String PIN) {
+    public static Card getCardByNumber(String number) {
         String sql = "SELECT * FROM card WHERE number = " + number;
 
         try (Connection con = connect();
@@ -80,10 +77,6 @@ public class BankDB {
             }
             String numberFromDB = rs.getString("number");
             String actualPIN = rs.getString("PIN");
-
-            if (!PIN.equals(actualPIN)) {
-                return null;
-            }
 
             int balance = rs.getInt("balance");
 
@@ -101,4 +94,61 @@ public class BankDB {
     }
 
 
+    public static void updateBalance(Card card, int amount) {
+        String sql = "UPDATE card SET balance = ? WHERE number = ?";
+
+        try (Connection con = connect();
+             PreparedStatement updateBalance = con.prepareStatement(sql)) {
+            updateBalance.setInt(1, amount);
+            updateBalance.setString(2, card.getNumber());
+
+            updateBalance.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Return boolean true or false, depending on if the transaction is successful.
+     *
+     * @return true or false
+     */
+    public static boolean transferMoney(Card sourceCard, Card cardToTransfer, int amount) {
+        String sql = "UPDATE card SET BALANCE = ? WHERE number = ?";
+
+        try (Connection con = connect();
+             PreparedStatement preparedStatement = con.prepareStatement(sql)) {
+            con.setAutoCommit(false);
+
+            // subtract balance from sourceCard
+            preparedStatement.setInt(1, sourceCard.getBalance() - amount);
+            preparedStatement.setString(2, sourceCard.getNumber());
+            preparedStatement.executeUpdate();
+
+            // add balance to cardToTransfer
+            preparedStatement.setInt(1, cardToTransfer.getBalance() + amount);
+            preparedStatement.setString(2, cardToTransfer.getNumber());
+            preparedStatement.executeUpdate();
+
+            con.commit();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean deleteCard(Card loggedInCard) {
+        String sql = "DELETE FROM card WHERE number = ?";
+
+        try (Connection con = connect(); PreparedStatement preparedStatement = con.prepareStatement(sql)) {
+            preparedStatement.setString(1, loggedInCard.getNumber());
+            preparedStatement.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

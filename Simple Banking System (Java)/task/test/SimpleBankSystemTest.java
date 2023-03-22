@@ -45,8 +45,8 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         if (!file.exists()) {
             return CheckResult.wrong("You should create a database file " +
-                "named " + databaseFileName + ". The file name should be taken from the command line arguments.\n" +
-                "The database file shouldn't be deleted after stopping the program!");
+                    "named " + databaseFileName + ". The file name should be taken from the command line arguments.\n" +
+                    "The database file shouldn't be deleted after stopping the program!");
         }
 
         return CheckResult.correct();
@@ -76,7 +76,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         try {
             ResultSet resultSet = getConnection().createStatement().executeQuery(
-                "SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';");
+                    "SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';");
             while (resultSet.next()) {
                 if (resultSet.getString("name").equals("card")) {
                     return CheckResult.correct();
@@ -108,15 +108,15 @@ public class SimpleBankSystemTest extends StageTest<String> {
             }
 
             String[][] correctColumns = {
-                {"id", "INTEGER", "INT"},
-                {"number", "TEXT", "VARCHAR"},
-                {"pin", "TEXT", "VARCHAR"},
-                {"balance", "INTEGER", "INT"}};
+                    {"id", "INTEGER", "INT"},
+                    {"number", "TEXT", "VARCHAR"},
+                    {"pin", "TEXT", "VARCHAR"},
+                    {"balance", "INTEGER", "INT"}};
 
             for (String[] correctColumn : correctColumns) {
                 String errorMessage = "Can't find '" + correctColumn[0] + "' column with '" + correctColumn[1] + "' type.\n" +
-                    "Your table should have columns described in " +
-                    "the stage instructions.";
+                        "Your table should have columns described in " +
+                        "the stage instructions.";
                 if (!columns.containsKey(correctColumn[0])) {
                     return CheckResult.wrong(errorMessage);
                 } else if (!columns.get(correctColumn[0]).contains(correctColumn[1]) && !columns.get(correctColumn[0]).contains(correctColumn[2])) {
@@ -144,35 +144,35 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         if (!getData(output)) {
             return CheckResult.wrong("You should output card number and PIN like in example\n" +
-                "Or it doesn't pass the Luhn algorithm");
+                    "Or it doesn't pass the Luhn algorithm");
         }
 
         output = program.execute("1");
 
         if (!getData(output)) {
             return CheckResult.wrong("You should output card number and PIN like in example\n" +
-                "Or it doesn't pass the Luhn algorithm");
+                    "Or it doesn't pass the Luhn algorithm");
         }
 
         output = program.execute("1");
 
         if (!getData(output)) {
             return CheckResult.wrong("You should output card number and PIN like in example\n" +
-                "Or it doesn't pass the Luhn algorithm");
+                    "Or it doesn't pass the Luhn algorithm");
         }
 
         output = program.execute("1");
 
         if (!getData(output)) {
             return CheckResult.wrong("You should output card number and PIN like in example\n" +
-                "Or it doesn't pass the Luhn algorithm");
+                    "Or it doesn't pass the Luhn algorithm");
         }
 
         output = program.execute("1");
 
         if (!getData(output)) {
             return CheckResult.wrong("You should output card number and PIN like in example\n" +
-                "Or it doesn't pass the Luhn algorithm");
+                    "Or it doesn't pass the Luhn algorithm");
         }
 
         stopAndCheckIfUserProgramWasStopped(program);
@@ -201,7 +201,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
                     return CheckResult.wrong("Your database doesn't save newly created cards.");
                 } else if (!userData.get(entry.getKey()).equals(entry.getValue())) {
                     return CheckResult.wrong("Correct PIN for card number " + entry.getKey() + " should " +
-                        "be " + entry.getValue());
+                            "be " + entry.getValue());
                 }
             }
 
@@ -226,15 +226,15 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         if (!cardNumberMatcher.find()) {
             return CheckResult.wrong("You are printing the card number " +
-                "incorrectly. The card number should look like in the example:" +
-                " 400000DDDDDDDDDD, where D is a digit.");
+                    "incorrectly. The card number should look like in the example:" +
+                    " 400000DDDDDDDDDD, where D is a digit.");
         }
 
         Matcher pinMatcher = pinPattern.matcher(output);
 
         if (!pinMatcher.find()) {
             return CheckResult.wrong("You are printing the card PIN " +
-                "incorrectly. The PIN should look like in the example: DDDD, where D is a digit.");
+                    "incorrectly. The PIN should look like in the example: DDDD, where D is a digit.");
         }
 
         String correctPin = pinMatcher.group().trim();
@@ -245,7 +245,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         if (!output.toLowerCase().contains("successfully")) {
             return CheckResult.wrong("The user should be signed in after" +
-                " entering the correct card information.");
+                    " entering the correct card information.");
         }
 
         stopAndCheckIfUserProgramWasStopped(program);
@@ -284,7 +284,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         if (output.toLowerCase().contains("successfully")) {
             return CheckResult.wrong("The user should not be signed in" +
-                " after entering incorrect card information.");
+                    " after entering incorrect card information.");
         }
 
         stopAndCheckIfUserProgramWasStopped(program);
@@ -322,7 +322,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
 
         if (output.toLowerCase().contains("successfully")) {
             return CheckResult.wrong("The user should not be signed in" +
-                " after entering incorrect card information.");
+                    " after entering incorrect card information.");
         }
 
         stopAndCheckIfUserProgramWasStopped(program);
@@ -366,7 +366,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
                 connection = DriverManager.getConnection("jdbc:sqlite:" + databaseFileName);
             } catch (SQLException exception) {
                 throw new WrongAnswer("Can't connect to the database! Make sure you close your database" +
-                    " connection at the end of the program!");
+                        " connection at the end of the program!");
             }
         }
         return connection;
@@ -396,7 +396,8 @@ public class SimpleBankSystemTest extends StageTest<String> {
         try {
             Files.deleteIfExists(tempDbFile);
             Files.move(userDbFile, tempDbFile);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     @AfterClass
@@ -413,7 +414,8 @@ public class SimpleBankSystemTest extends StageTest<String> {
         try {
             Files.deleteIfExists(userDbFile);
             Files.move(tempDbFile, userDbFile);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     private boolean getData(String out) {
@@ -467,7 +469,7 @@ public class SimpleBankSystemTest extends StageTest<String> {
         program.execute("0");
         if (!program.isFinished()) {
             throw new WrongAnswer("After choosing 'Exit' item you should stop your program" +
-                " and close database connection!");
+                    " and close database connection!");
         }
     }
 }

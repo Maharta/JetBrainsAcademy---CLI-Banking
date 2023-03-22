@@ -12,6 +12,12 @@ public class Card {
         PIN = generateRandomPIN();
     }
 
+    public Card(String number, String PIN, int balance) {
+        this.number = number;
+        this.PIN = PIN;
+        this.balance = balance;
+    }
+
 
     private String generateRandomCardNumber() {
         Random random = new Random();
@@ -38,9 +44,6 @@ public class Card {
         return firstDigit + secondDigit + thirdDigit + fourthDigit;
     }
 
-    public boolean login(String PIN) {
-        return this.PIN.equals(PIN);
-    }
 
     public int getBalance() {
         return this.balance;

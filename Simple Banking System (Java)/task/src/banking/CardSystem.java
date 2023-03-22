@@ -1,10 +1,7 @@
 package banking;
 
-import java.util.HashMap;
-
-
 public class CardSystem {
-    private static final HashMap<String, Card> cardMap = new HashMap<>();
+    //    private static final HashMap<String, Card> cardMap = new HashMap<>();
     private static CardSystem instance;
 
     public static synchronized CardSystem getInstance() {
@@ -14,7 +11,7 @@ public class CardSystem {
         return instance;
     }
 
-    public void addCard(Card card) {
+   /* public void addCard(Card card) {
         if (cardMap.containsKey(card.getNumber())) {
             throw new IllegalArgumentException("Account number already exist");
         }
@@ -24,14 +21,21 @@ public class CardSystem {
 
     public Card getCardByNumber(String number) {
         return cardMap.get(number);
-    }
+    }*/
 
     public Card addCard() {
         Card newCard = new Card();
-        if (cardMap.containsKey(newCard.getNumber())) {
-            return addCard();
+        BankDB.createCardTableIfNotExist();
+        int statusCode = BankDB.addNewCard(newCard);
+        if (statusCode != 0) {
+            return newCard;
         }
-        cardMap.put(newCard.getNumber(), newCard);
-        return newCard;
+        return addCard();
     }
+
+    public Card loginWithCredentials(String number, String PIN) {
+        return BankDB.getRequestedNumber(number, PIN);
+    }
+
+
 }
